@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Date-Based Image Viewer</title>
+  <title>Weather Image Downloader</title>
   <style>
     body {
       font-family: sans-serif;
@@ -10,7 +10,7 @@
       max-width: 800px;
       margin: auto;
     }
-    input, select, button {
+    input, select {
       margin: 10px 0;
       padding: 6px;
     }
@@ -21,6 +21,16 @@
     }
     .image-container {
       margin-bottom: 30px;
+    }
+    .download-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      margin-top: 5px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -47,14 +57,14 @@
     <h3>Station Plot</h3>
     <img id="image1" src="" alt="Station image will appear here">
     <br>
-    <a id="download1" href="#" download>Download Station Plot</a>
+    <button id="download1" class="download-btn">Download Station Plot</button>
   </div>
 
   <div class="image-container">
     <h3>Surface Fronts</h3>
     <img id="image2" src="" alt="Fronts image will appear here">
     <br>
-    <a id="download2" href="#" download>Download Surface Fronts</a>
+    <button id="download2" class="download-btn">Download Surface Fronts</button>
   </div>
 
   <script>
@@ -65,6 +75,17 @@
     const download1 = document.getElementById('download1');
     const download2 = document.getElementById('download2');
 
+    const proxyBase = 'http://localhost:3000/proxy?url=';
+
+    function triggerDownload(proxiedUrl, filename) {
+      const a = document.createElement('a');
+      a.href = proxiedUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
     function updateImages() {
       const date = dateInput.value;
       const station = stationSelect.value;
@@ -74,23 +95,25 @@
       const [year, month, day] = date.split("-");
       const yyyymmdd = `${year}${month}${day}`;
 
-      // Base URLs with dynamic substitution
-      const url1 = station
+      const rawUrl1 = station
         ? `https://operations.nysmesonet.org/~nbassill/archive/${year}/${month}/${day}/station/${station}.png`
         : "";
 
-      const url2 = `https://www.wpc.ncep.noaa.gov/archives/sfc/${year}/usfntsfc${yyyymmdd}15.gif`;
+      const rawUrl2 = `https://www.wpc.ncep.noaa.gov/archives/sfc/${year}/usfntsfc${yyyymmdd}15.gif`;
+
+      const proxyUrl1 = rawUrl1 ? proxyBase + encodeURIComponent(rawUrl1) : "";
+      const proxyUrl2 = proxyBase + encodeURIComponent(rawUrl2);
 
       if (station) {
-        image1.src = url1;
-        download1.href = url1;
+        image1.src = rawUrl1;
+        download1.onclick = () => triggerDownload(proxyUrl1, `${station}_${yyyymmdd}.png`);
       } else {
         image1.src = "";
-        download1.href = "#";
+        download1.onclick = null;
       }
 
-      image2.src = url2;
-      download2.href = url2;
+      image2.src = rawUrl2;
+      download2.onclick = () => triggerDownload(proxyUrl2, `usfntsfc${yyyymmdd}15.gif`);
     }
 
     dateInput.addEventListener('change', updateImages);
