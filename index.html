@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Date-Based Image Viewer</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    input, select, button {
+      margin: 10px 0;
+      padding: 6px;
+    }
+    img {
+      max-width: 100%;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+    }
+    .image-container {
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Weather Images by Date</h2>
+
+  <label for="dateInput">Select a date:</label><br>
+  <input type="date" id="dateInput"><br><br>
+
+  <label for="stationSelect">Choose a station:</label><br>
+  <select id="stationSelect">
+    <option value="">-- Select a station --</option>
+    <option value="ALBA">ALBA</option>
+    <option value="BING">BING</option>
+    <option value="BUFF">BUFF</option>
+    <option value="NYC1">NYC1</option>
+    <option value="JFK1">JFK1</option>
+    <option value="SYRA">SYRA</option>
+    <!-- Add more station codes as needed -->
+  </select><br><br>
+
+  <div class="image-container">
+    <h3>Station Plot</h3>
+    <img id="image1" src="" alt="Station image will appear here">
+    <br>
+    <a id="download1" href="#" download>Download Station Plot</a>
+  </div>
+
+  <div class="image-container">
+    <h3>Surface Fronts</h3>
+    <img id="image2" src="" alt="Fronts image will appear here">
+    <br>
+    <a id="download2" href="#" download>Download Surface Fronts</a>
+  </div>
+
+  <script>
+    const dateInput = document.getElementById('dateInput');
+    const stationSelect = document.getElementById('stationSelect');
+    const image1 = document.getElementById('image1');
+    const image2 = document.getElementById('image2');
+    const download1 = document.getElementById('download1');
+    const download2 = document.getElementById('download2');
+
+    function updateImages() {
+      const date = dateInput.value;
+      const station = stationSelect.value;
+
+      if (!date) return;
+
+      const [year, month, day] = date.split("-");
+      const yyyymmdd = `${year}${month}${day}`;
+
+      // Base URLs with dynamic substitution
+      const url1 = station
+        ? `https://operations.nysmesonet.org/~nbassill/archive/${year}/${month}/${day}/station/${station}.png`
+        : "";
+
+      const url2 = `https://www.wpc.ncep.noaa.gov/archives/sfc/${year}/usfntsfc${yyyymmdd}15.gif`;
+
+      if (station) {
+        image1.src = url1;
+        download1.href = url1;
+      } else {
+        image1.src = "";
+        download1.href = "#";
+      }
+
+      image2.src = url2;
+      download2.href = url2;
+    }
+
+    dateInput.addEventListener('change', updateImages);
+    stationSelect.addEventListener('change', updateImages);
+  </script>
+
+</body>
+</html>
